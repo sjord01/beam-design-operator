@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Beam Design — UI</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header><h1>Beam Design & Optimization — Demo UI</h1></header>
+
+<main>
+    <section id="submit">
+        <h2>Create Model & Compute</h2>
+        <form id="designForm">
+            <label>Length (m): <input type="number" step="0.1" name="length" value="6"></label>
+            <label>Material ID: <input type="text" name="materialId" value="concrete-c30"></label>
+            <label>Target Safety Factor: <input type="number" step="0.1" name="targetSafetyFactor" value="1.5"></label>
+            <label>Point Load Position (m): <input type="number" step="0.1" name="loadPos" value="3.0"></label>
+            <label>Point Load Value (kN): <input type="number" step="0.1" name="loadVal" value="20"></label>
+            <label>Supports:
+                <select name="supports">
+                    <option value="pinned,pinned">Pinned - Pinned</option>
+                    <option value="pinned,roller">Pinned - Roller</option>
+                </select>
+            </label>
+            <div class="buttons">
+                <button type="button" id="saveModel">Save Model</button>
+                <button type="button" id="computeNow">Compute Now</button>
+            </div>
+        </form>
+        <div id="submitResult"></div>
+    </section>
+
+    <section id="models">
+        <h2>Models</h2>
+        <div id="modelList">No models yet</div>
+    </section>
+
+    <section id="results">
+        <h2>Results</h2>
+        <div id="resultArea">Run compute to see results here.</div>
+    </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
