@@ -1,11 +1,11 @@
-package com.sordonez.beamdesign.worker.controller;
+package com.sordonez.beamdesign.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sordonez.beamdesign.worker.model.BeamModel;
 import com.sordonez.beamdesign.worker.model.BeamResult;
 import com.sordonez.beamdesign.worker.repository.BeamModelRepository;
 import com.sordonez.beamdesign.worker.repository.BeamResultRepository;
-import com.sordonez.beamdesign.worker.service.ComputeService;
+import com.sordonez.beamdesign.service.ComputeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

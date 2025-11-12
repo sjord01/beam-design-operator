@@ -1,4 +1,4 @@
-package com.sordonez.beamdesign.worker.service;
+package com.sordonez.beamdesign.service;
 
 import com.sordonez.beamdesign.worker.model.BeamResult;
 import com.sordonez.beamdesign.worker.repository.BeamResultRepository;
