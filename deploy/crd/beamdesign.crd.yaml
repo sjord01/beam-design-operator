@@ -6,6 +6,7 @@ spec:
   group: beam.sordonez.com
   names:
     kind: BeamDesign
+    listKind: BeamDesignList
     plural: beamdesigns
     singular: beamdesign
   scope: Namespaced
@@ -22,24 +23,30 @@ spec:
               properties:
                 length:
                   type: number
+                # define loads items structure so server-side validation accepts position/value
                 loads:
                   type: array
                   items:
                     type: object
+                    properties:
+                      position:
+                        type: number
+                      value:
+                        type: number
+                materialId:
+                  type: string
                 supports:
                   type: array
                   items:
                     type: string
-                materialId:
-                  type: string
                 sweep:
                   type: object
             status:
               type: object
               properties:
-                phase:
-                  type: string
                 jobName:
+                  type: string
+                phase:
                   type: string
                 resultId:
                   type: string
