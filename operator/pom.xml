@@ -44,7 +44,7 @@
         <dependency>
             <groupId>io.javaoperatorsdk</groupId>
             <artifactId>operator-framework</artifactId>
-            <version>3.6.0</version>
+            <version>5.1.4</version>
         </dependency>
         <!-- Add Kubernetes client if needed -->
         <dependency>
@@ -56,6 +56,13 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- Ensure Fabric8 httpclient version matches client-api (6.4.1) -->
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-httpclient-jdk</artifactId>
+            <version>6.4.1</version>
         </dependency>
     </dependencies>
 

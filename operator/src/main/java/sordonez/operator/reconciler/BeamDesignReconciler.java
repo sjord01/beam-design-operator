@@ -2,10 +2,13 @@ package sordonez.operator.reconciler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.api.model.batch.v1.JobBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.javaoperatorsdk.operator.api.reconciler.*;
+import io.javaoperatorsdk.operator.api.reconciler.Context;
+import io.javaoperatorsdk.operator.api.reconciler.Reconciler;
+import io.javaoperatorsdk.operator.api.reconciler.UpdateControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -23,9 +26,8 @@ import java.util.Map;
  * - updates status.phase = Running and stores jobName,
  * - when Job succeeds, sets status.phase = Succeeded and stores a basic resultId.
  *
- * Note: adjust image name/tag and resource limits for your environment.
+ * Note: we rely on Spring (@Component) to register this Reconciler with the Java Operator SDK.
  */
-@Controller
 @Component
 public class BeamDesignReconciler implements Reconciler<BeamDesign> {
     private final KubernetesClient client;
@@ -47,20 +49,20 @@ public class BeamDesignReconciler implements Reconciler<BeamDesign> {
 
         // If no job started yet, create ConfigMap + Job
         if (status.getJobName() == null || status.getJobName().isEmpty()) {
-            // create configmap with spec JSON
             String cmName = "beam-spec-" + name;
             String specJson = mapper.writeValueAsString(resource.getSpec());
+
             ConfigMap cm = new ConfigMap();
-            cm.getMetadata().setName(cmName);
-            cm.getMetadata().setNamespace(ns);
+            ObjectMeta cmMeta = new ObjectMeta();
+            cmMeta.setName(cmName);
+            cmMeta.setNamespace(ns);
+            cm.setMetadata(cmMeta);
             Map<String,String> data = new HashMap<>();
             data.put("spec.json", specJson);
             cm.setData(data);
 
-            // apply configmap (create or replace)
             client.configMaps().inNamespace(ns).createOrReplace(cm);
 
-            // build a Job
             String jobName = "beamcompute-" + name + "-" + Instant.now().getEpochSecond();
             Job job = new JobBuilder()
                     .withNewMetadata()
@@ -74,7 +76,7 @@ public class BeamDesignReconciler implements Reconciler<BeamDesign> {
                     .withRestartPolicy("Never")
                     .addNewContainer()
                     .withName("beam-worker")
-                    .withImage("sjord01/beam-worker:0.1.0") // adjust tag
+                    .withImage("sjord01/beam-worker:0.1.0") // adjust tag if needed
                     .addNewEnv()
                     .withName("BEAM_SPEC_CONFIGMAP")
                     .withNewValueFrom()
@@ -96,7 +98,7 @@ public class BeamDesignReconciler implements Reconciler<BeamDesign> {
             status.setJobName(jobName);
             status.setMessage("Job created: " + jobName);
             log.info("Created Job {} for BeamDesign {}/{}", jobName, ns, name);
-            return UpdateControl.updateStatus(resource);
+            return UpdateControl.patchStatus(resource);
         }
 
         // If a job exists, check job status
@@ -105,25 +107,24 @@ public class BeamDesignReconciler implements Reconciler<BeamDesign> {
             // job disappeared — mark failed
             status.setPhase("Failed");
             status.setMessage("Job not found: " + status.getJobName());
-            return UpdateControl.updateStatus(resource);
+            return UpdateControl.patchStatus(resource);
         }
 
         Integer succeeded = job.getStatus() != null ? job.getStatus().getSucceeded() : null;
         Integer failed = job.getStatus() != null ? job.getStatus().getFailed() : null;
         if (succeeded != null && succeeded > 0) {
             status.setPhase("Succeeded");
-            // For demo: set resultId to jobName; in real flow operator should retrieve real result (DB or object store)
-            status.setResultId(status.getJobName());
+            status.setResultId(status.getJobName()); // placeholder; replace with real result retrieval
             status.setMessage("Job succeeded");
             log.info("Job {} succeeded for BeamDesign {}/{}", status.getJobName(), ns, name);
-            return UpdateControl.updateStatus(resource);
+            return UpdateControl.patchStatus(resource);
         }
 
         if (failed != null && failed > 0) {
             status.setPhase("Failed");
             status.setMessage("Job failed");
             log.warn("Job {} failed for BeamDesign {}/{}", status.getJobName(), ns, name);
-            return UpdateControl.updateStatus(resource);
+            return UpdateControl.patchStatus(resource);
         }
 
         // still running -> no status update necessary
