@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: beamcompute-<CR_NAME>-<RAND>
+  namespace: beam
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: beam-worker
+          image: sjord01/beam-worker:0.1.0
+          env:
+            - name: BEAM_SPEC_JSON
+              valueFrom:
+                configMapKeyRef:
+                  name: beam-spec-<CR_NAME>
+                  key: spec.json
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

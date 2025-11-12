@@ -1,0 +1,11 @@
+apiVersion: beam.sordonez.com/v1
+kind: BeamDesign
+metadata:
+  name: demo-beam-1
+  namespace: beam
+spec:
+  length: 6.0
+  loads:
+    - position: 3
+      value: 20
+  supports: ["pinned","pinned"]
